@@ -1,0 +1,18 @@
+{
+  "name": "figma-plugin",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "watch": "pug --watch ui.pug --out . && sass --watch styles.sass styles.css",
+    "build": "pug ui.pug --out . && sass styles.sass styles.css && node build.js",
+    "watch-build": "chokidar 'ui.pug' 'styles.sass' -c 'npm run build'"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@figma/plugin-typings": "^1.109.0",
+    "fs-extra": "^11.3.0"
+  }
+}
