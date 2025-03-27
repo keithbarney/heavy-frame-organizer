@@ -1,6 +1,6 @@
 {
-    "name": "Screen Organizer",
-    "id": "figma-plugin",
+    "name": "Heavy Frame Organizer",
+    "id": "heavy-frame-organizer",
     "api": "1.0.0",
     "main": "code.js",
     "ui": "ui.html",

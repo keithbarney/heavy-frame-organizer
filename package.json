@@ -1,7 +1,7 @@
 {
-  "name": "figma-plugin",
+  "name": "heavy-frame-organizer",
   "version": "1.0.0",
-  "description": "",
+  "description": "A very heavy Figma plugin for organizing frames.",
   "main": "index.js",
   "scripts": {
     "watch": "pug --watch ui.pug --out . && sass --watch styles.sass styles.css",
