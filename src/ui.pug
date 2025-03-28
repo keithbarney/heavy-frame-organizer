@@ -2,7 +2,7 @@ doctype html
 html(lang="en")
 	head
 		meta(charset="UTF-8")
-		title Heavy Frame Organizer
+		title Heavy Page Organizer
 		link(rel="stylesheet" href="./dist/styles.css")
 
 	body
@@ -18,7 +18,7 @@ html(lang="en")
 					label(for="verticalSpacing") Vertical Spacing:
 					input#verticalSpacing(type="number" value="500")
 
-			button#apply(onclick="applySpacing()") Apply
+			button#apply(onclick="applySpacing()" autofocus) Apply
 
 		script.
 			window.onload = function() {

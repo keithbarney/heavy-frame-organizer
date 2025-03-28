@@ -1,8 +1,10 @@
 {
-    "name": "Heavy Frame Organizer",
-    "id": "heavy-frame-organizer",
+    "name": "Heavy Page Organizer",
+    "id": "1487553215664919333",
     "api": "1.0.0",
     "main": "dist/code.js",
     "ui": "dist/ui.html",
+    "networkAccess": { "allowedDomains": ["none"] },
+    "documentAccess": "dynamic-page",
     "editorType": ["figma"]
 }

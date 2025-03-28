@@ -1,4 +1,4 @@
-# Ensure the UI is properly loaded with an adjustable size
+# Ensure the UI is properly loaded with adjustable size
 figma.showUI(__html__, { width: 400, height: 400 })
 
 # Load previous spacing values from client storage
@@ -39,8 +39,9 @@ organizeFrames = (verticalSpacing, horizontalSpacing) ->
 
 	mainComponent = null
 	subComponents = []
+	sections = []
 
-	# Identify main component & sub-components
+	# Identify main component, sub-components, and sections
 	for node in figma.currentPage.children
 		console.log "Checking:", node.name, "Type:", node.type
 
@@ -49,6 +50,9 @@ organizeFrames = (verticalSpacing, horizontalSpacing) ->
 				subComponents.push(node) # Store sub-components
 			else if not mainComponent
 				mainComponent = node # Set the first non-prefixed component as main
+
+		if node.type == "SECTION"
+			sections.push(node) # Store sections
 
 	# Move the main component to (0,0)
 	if mainComponent
@@ -64,13 +68,21 @@ organizeFrames = (verticalSpacing, horizontalSpacing) ->
 			subComponent.y = yOffset
 			yOffset += subComponent.height + verticalSpacing
 
+		# Move sections to the right of the main component
+		xOffset = mainComponent.x + mainComponent.width + horizontalSpacing
+		for section in sections.sort((a, b) -> a.name.localeCompare(b.name))
+			console.log "Moving section:", section.name, "to (", xOffset, ",", mainComponent.y, ")"
+			section.x = xOffset
+			section.y = mainComponent.y
+			xOffset += section.width + horizontalSpacing
+
 	else
-		console.log "No main component found. Sub-components will not be moved."
+		console.log "No main component found. Sub-components and sections will not be moved."
 
 	# Refresh the Figma UI
-	figma.currentPage.selection = if mainComponent then [mainComponent].concat(subComponents) else subComponents
+	figma.currentPage.selection = if mainComponent then [mainComponent].concat(subComponents).concat(sections) else subComponents.concat(sections)
 	figma.viewport.scrollAndZoomIntoView(figma.currentPage.selection)
 
 	console.log "Reorganization complete!"
-	figma.notify("Main and sub-components arranged!")
+	figma.notify("Main, sub-components, and sections arranged!")
 	figma.closePlugin()

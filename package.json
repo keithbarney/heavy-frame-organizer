@@ -1,7 +1,7 @@
 {
-  "name": "heavy-frame-organizer",
+  "name": "heavy-page-organizer",
   "version": "1.0.0",
-  "description": "A very heavy Figma plugin for organizing frames.",
+  "description": "A very heavy Figma plugin for organizing pages.",
   "main": "dist/code.js",
   "scripts": {
     "watch": "pug --watch src/ui.pug --out dist/ && sass --watch src/styles.sass dist/styles.css && coffee -w -o dist/ src/",
