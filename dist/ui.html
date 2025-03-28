@@ -1,0 +1,88 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Heavy Frame Organizer</title><link rel="stylesheet" href="./dist/styles.css"><style>body {
+  font-family: Roboto, Arial, sans-serif;
+  box-sizing: border-box;
+  line-height: 1.5;
+  margin: 0;
+}
+
+h3 {
+  padding: 0;
+  margin: 0;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  row-gap: 24px;
+  padding: 24px;
+}
+
+.form-container {
+  display: grid;
+  row-gap: 24px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+label, input, button {
+  font-size: 16px;
+  border: 0;
+}
+
+label {
+  margin-bottom: 8px;
+}
+
+input {
+  background: #eee;
+  border: 1px solid #ccc;
+}
+
+input, button {
+  padding: 16px 16px;
+}
+
+button {
+  cursor: pointer;
+  font-size: 16px;
+  background: black;
+  color: white;
+  border: none;
+  border-radius: 8px;
+}
+
+/*# sourceMappingURL=styles.css.map */
+</style></head><body><div class="container"> <h3>Set Spacing</h3><div class="form-container"><div class="form-group"><label for="horizontalSpacing">Horizontal Spacing:</label><input id="horizontalSpacing" type="number" value="500"></div><div class="form-group"> <label for="verticalSpacing">Vertical Spacing:</label><input id="verticalSpacing" type="number" value="500"></div></div><button id="apply" onclick="applySpacing()">Apply</button></div><script>window.onload = function() {
+	window.onmessage = function(event) {
+		if (event.data.pluginMessage?.type === "load-spacing") {
+			document.getElementById("horizontalSpacing").value = event.data.pluginMessage.horizontalSpacing || 500;
+			document.getElementById("verticalSpacing").value = event.data.pluginMessage.verticalSpacing || 500;
+		}
+	};
+
+	// Request spacing values from Figma
+	parent.postMessage({ pluginMessage: { type: "request-spacing-values" } }, "*");
+};
+
+window.applySpacing = function() {
+	const horizontalSpacingInput = document.getElementById("horizontalSpacing");
+	const verticalSpacingInput = document.getElementById("verticalSpacing");
+
+	const horizontalSpacing = parseFloat(horizontalSpacingInput?.value);
+	const verticalSpacing = parseFloat(verticalSpacingInput?.value);
+
+	if (isNaN(horizontalSpacing) || isNaN(verticalSpacing)) {
+		console.error("Invalid input values. Please enter valid numbers for spacing.");
+		return;
+	}
+
+	parent.postMessage(
+		{ pluginMessage: { type: "organize-frames", horizontalSpacing: horizontalSpacing || 0, verticalSpacing: verticalSpacing || 0 } },
+		"*"
+	);
+
+	console.log(`Sent to Figma: {horizontalSpacing: ${horizontalSpacing}, verticalSpacing: ${verticalSpacing}}`);
+};</script></body></html>

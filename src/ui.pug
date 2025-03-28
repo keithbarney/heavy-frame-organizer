@@ -1,0 +1,54 @@
+doctype html
+html(lang="en")
+	head
+		meta(charset="UTF-8")
+		title Heavy Frame Organizer
+		link(rel="stylesheet" href="./dist/styles.css")
+
+	body
+		.container 
+			h3 Set Spacing
+
+			.form-container
+				.form-group
+					label(for="horizontalSpacing") Horizontal Spacing:
+					input#horizontalSpacing(type="number" value="500")
+
+				.form-group 
+					label(for="verticalSpacing") Vertical Spacing:
+					input#verticalSpacing(type="number" value="500")
+
+			button#apply(onclick="applySpacing()") Apply
+
+		script.
+			window.onload = function() {
+				window.onmessage = function(event) {
+					if (event.data.pluginMessage?.type === "load-spacing") {
+						document.getElementById("horizontalSpacing").value = event.data.pluginMessage.horizontalSpacing || 500;
+						document.getElementById("verticalSpacing").value = event.data.pluginMessage.verticalSpacing || 500;
+					}
+				};
+
+				// Request spacing values from Figma
+				parent.postMessage({ pluginMessage: { type: "request-spacing-values" } }, "*");
+			};
+
+			window.applySpacing = function() {
+				const horizontalSpacingInput = document.getElementById("horizontalSpacing");
+				const verticalSpacingInput = document.getElementById("verticalSpacing");
+
+				const horizontalSpacing = parseFloat(horizontalSpacingInput?.value);
+				const verticalSpacing = parseFloat(verticalSpacingInput?.value);
+
+				if (isNaN(horizontalSpacing) || isNaN(verticalSpacing)) {
+					console.error("Invalid input values. Please enter valid numbers for spacing.");
+					return;
+				}
+
+				parent.postMessage(
+					{ pluginMessage: { type: "organize-frames", horizontalSpacing: horizontalSpacing || 0, verticalSpacing: verticalSpacing || 0 } },
+					"*"
+				);
+
+				console.log(`Sent to Figma: {horizontalSpacing: ${horizontalSpacing}, verticalSpacing: ${verticalSpacing}}`);
+			};
