@@ -55,7 +55,10 @@ button {
 }
 
 /*# sourceMappingURL=styles.css.map */
-</style></head><body><div class="container"> <h3>Set Spacing</h3><div class="form-container"><div class="form-group"><label for="horizontalSpacing">Horizontal Spacing:</label><input id="horizontalSpacing" type="number" value="500"></div><div class="form-group"> <label for="verticalSpacing">Vertical Spacing:</label><input id="verticalSpacing" type="number" value="500"></div></div><button id="apply" onclick="applySpacing()" autofocus>Apply</button></div><script>window.onload = function() {
+</style></head><body><div class="container"> <h3>Set Spacing</h3><div class="form-container"><div class="form-group"><label for="horizontalSpacing">Horizontal Spacing:</label><input id="horizontalSpacing" type="number" value="500" autofocus></div><div class="form-group"> <label for="verticalSpacing">Vertical Spacing:</label><input id="verticalSpacing" type="number" value="500"></div></div><button id="apply" onclick="applySpacing()">Apply</button></div><script>window.onload = function() {
+	// Set focus manually
+	document.getElementById("horizontalSpacing").focus();
+
 	window.onmessage = function(event) {
 		if (event.data.pluginMessage?.type === "load-spacing") {
 			document.getElementById("horizontalSpacing").value = event.data.pluginMessage.horizontalSpacing || 500;
