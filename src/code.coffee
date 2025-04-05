@@ -37,7 +37,7 @@ figma.ui.onmessage = (msg) ->
 organizeFrames = (verticalSpacing, horizontalSpacing) ->
 	console.log "Scanning elements on the Figma page..."
 
-	mainComponent = null
+	mainComponents = []
 	subComponents = []
 	sections = []
 
@@ -48,39 +48,55 @@ organizeFrames = (verticalSpacing, horizontalSpacing) ->
 		if node.type == "COMPONENT" or node.type == "COMPONENT_SET"
 			if node.name.startsWith(".")
 				subComponents.push(node) # Store sub-components
-			else if not mainComponent
-				mainComponent = node # Set the first non-prefixed component as main
+			else
+				mainComponents.push(node) # Store main components
 
 		if node.type == "SECTION"
 			sections.push(node) # Store sections
 
-	# Move the main component to (0,0)
-	if mainComponent
-		console.log "Setting main component:", mainComponent.name, "to (0,0)"
-		mainComponent.x = 0
-		mainComponent.y = 0
+	# Move the main components
+	if mainComponents.length > 0
+		console.log "Organizing #{mainComponents.length} main components"
+		allSelected = []
+		xOffset = 0
+		maxColumnHeight = 0
 
-		# Move sub-components below the main component
-		yOffset = mainComponent.y + mainComponent.height + verticalSpacing
-		for subComponent in subComponents.sort((a, b) -> a.name.localeCompare(b.name))
-			console.log "Moving sub-component:", subComponent.name, "to (0,", yOffset, ")"
-			subComponent.x = mainComponent.x # Keep x aligned with main component
-			subComponent.y = yOffset
-			yOffset += subComponent.height + verticalSpacing
+		for mainComponent in mainComponents.sort((a, b) -> a.name.localeCompare(b.name))
+			console.log "Setting main component:", mainComponent.name, "to (#{xOffset}, 0)"
+			mainComponent.x = xOffset
+			mainComponent.y = 0
+			allSelected.push(mainComponent)
 
-		# Move sections to the right of the main component
-		xOffset = mainComponent.x + mainComponent.width + horizontalSpacing
+			yOffset = mainComponent.height + verticalSpacing
+
+			relatedSubComponents = subComponents.filter (sub) ->
+				sub.name.trim().startsWith(".#{mainComponent.name.trim()}")
+			for subComponent in relatedSubComponents.sort((a, b) -> a.name.localeCompare(b.name))
+				console.log "Moving sub-component:", subComponent.name, "to (#{xOffset},#{yOffset})"
+				subComponent.x = xOffset
+				subComponent.y = yOffset
+				yOffset += subComponent.height + verticalSpacing
+				allSelected.push(subComponent)
+
+			columnHeight = yOffset
+			if columnHeight > maxColumnHeight then maxColumnHeight = columnHeight
+
+			xOffset += mainComponent.width + horizontalSpacing
+
+		sectionXOffset = xOffset
+		sectionYOffset = 0
 		for section in sections.sort((a, b) -> a.name.localeCompare(b.name))
-			console.log "Moving section:", section.name, "to (", xOffset, ",", mainComponent.y, ")"
-			section.x = xOffset
-			section.y = mainComponent.y
-			xOffset += section.width + horizontalSpacing
+			console.log "Moving section:", section.name, "to (#{sectionXOffset},#{sectionYOffset})"
+			section.x = sectionXOffset
+			section.y = sectionYOffset
+			sectionYOffset += section.height + verticalSpacing
+			allSelected.push(section)
 
 	else
-		console.log "No main component found. Sub-components and sections will not be moved."
+		console.log "No main components found. Sub-components and sections will not be moved."
 
 	# Refresh the Figma UI
-	figma.currentPage.selection = if mainComponent then [mainComponent].concat(subComponents).concat(sections) else subComponents.concat(sections)
+	figma.currentPage.selection = allSelected
 	figma.viewport.scrollAndZoomIntoView(figma.currentPage.selection)
 
 	console.log "Reorganization complete!"

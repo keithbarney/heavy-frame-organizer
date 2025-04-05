@@ -168,9 +168,9 @@
 
   // Function to organize Figma elements
   organizeFrames = function(verticalSpacing, horizontalSpacing) {
-    var i, j, k, len, len1, len2, mainComponent, node, ref, ref1, ref2, section, sections, subComponent, subComponents, xOffset, yOffset;
+    var allSelected, columnHeight, i, j, k, l, len, len1, len2, len3, mainComponent, mainComponents, maxColumnHeight, node, ref, ref1, ref2, ref3, relatedSubComponents, section, sectionXOffset, sectionYOffset, sections, subComponent, subComponents, xOffset, yOffset;
     console.log("Scanning elements on the Figma page...");
-    mainComponent = null;
+    mainComponents = [];
     subComponents = [];
     sections = [];
     ref = figma.currentPage.children;
@@ -181,8 +181,8 @@
       if (node.type === "COMPONENT" || node.type === "COMPONENT_SET") {
         if (node.name.startsWith(".")) {
           subComponents.push(node); // Store sub-components
-        } else if (!mainComponent) {
-          mainComponent = node; // Set the first non-prefixed component as main
+        } else {
+          mainComponents.push(node); // Store main components
         }
       }
       if (node.type === "SECTION") {
@@ -190,40 +190,60 @@
       }
     }
     
-    // Move the main component to (0,0)
-    if (mainComponent) {
-      console.log("Setting main component:", mainComponent.name, "to (0,0)");
-      mainComponent.x = 0;
-      mainComponent.y = 0;
-      // Move sub-components below the main component
-      yOffset = mainComponent.y + mainComponent.height + verticalSpacing;
-      ref1 = subComponents.sort(function(a, b) {
+    // Move the main components
+    if (mainComponents.length > 0) {
+      console.log(`Organizing ${mainComponents.length} main components`);
+      allSelected = [];
+      xOffset = 0;
+      maxColumnHeight = 0;
+      ref1 = mainComponents.sort(function(a, b) {
         return a.name.localeCompare(b.name);
       });
       for (j = 0, len1 = ref1.length; j < len1; j++) {
-        subComponent = ref1[j];
-        console.log("Moving sub-component:", subComponent.name, "to (0,", yOffset, ")");
-        subComponent.x = mainComponent.x; // Keep x aligned with main component
-        subComponent.y = yOffset;
-        yOffset += subComponent.height + verticalSpacing;
+        mainComponent = ref1[j];
+        console.log("Setting main component:", mainComponent.name, `to (${xOffset}, 0)`);
+        mainComponent.x = xOffset;
+        mainComponent.y = 0;
+        allSelected.push(mainComponent);
+        yOffset = mainComponent.height + verticalSpacing;
+        relatedSubComponents = subComponents.filter(function(sub) {
+          return sub.name.trim().startsWith(`.${mainComponent.name.trim()}`);
+        });
+        ref2 = relatedSubComponents.sort(function(a, b) {
+          return a.name.localeCompare(b.name);
+        });
+        for (k = 0, len2 = ref2.length; k < len2; k++) {
+          subComponent = ref2[k];
+          console.log("Moving sub-component:", subComponent.name, `to (${xOffset},${yOffset})`);
+          subComponent.x = xOffset;
+          subComponent.y = yOffset;
+          yOffset += subComponent.height + verticalSpacing;
+          allSelected.push(subComponent);
+        }
+        columnHeight = yOffset;
+        if (columnHeight > maxColumnHeight) {
+          maxColumnHeight = columnHeight;
+        }
+        xOffset += mainComponent.width + horizontalSpacing;
       }
-      // Move sections to the right of the main component
-      xOffset = mainComponent.x + mainComponent.width + horizontalSpacing;
-      ref2 = sections.sort(function(a, b) {
+      sectionXOffset = xOffset;
+      sectionYOffset = 0;
+      ref3 = sections.sort(function(a, b) {
         return a.name.localeCompare(b.name);
       });
-      for (k = 0, len2 = ref2.length; k < len2; k++) {
-        section = ref2[k];
-        console.log("Moving section:", section.name, "to (", xOffset, ",", mainComponent.y, ")");
-        section.x = xOffset;
-        section.y = mainComponent.y;
-        xOffset += section.width + horizontalSpacing;
+      for (l = 0, len3 = ref3.length; l < len3; l++) {
+        section = ref3[l];
+        console.log("Moving section:", section.name, `to (${sectionXOffset},${sectionYOffset})`);
+        section.x = sectionXOffset;
+        section.y = sectionYOffset;
+        sectionYOffset += section.height + verticalSpacing;
+        allSelected.push(section);
       }
     } else {
-      console.log("No main component found. Sub-components and sections will not be moved.");
+      console.log("No main components found. Sub-components and sections will not be moved.");
     }
     // Refresh the Figma UI
-    figma.currentPage.selection = mainComponent ? [mainComponent].concat(subComponents).concat(sections) : subComponents.concat(sections);
+    figma.currentPage.selection = allSelected;
     figma.viewport.scrollAndZoomIntoView(figma.currentPage.selection);
     console.log("Reorganization complete!");
     figma.notify("Main, sub-components, and sections arranged!");
